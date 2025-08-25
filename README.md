@@ -57,4 +57,4 @@ Example: A test file has been shared with both **admintest** and **usertest** by
 
 ### 2. Scalable File Storage  
 **Problem:** Files were stored locally, which adds difficulty to scaling horizontally (as each server would need its own copy). It also risked file I/O bottlenecks on the app server.  
-**Fix:** Switched to MinIO, an S3-compatible object store. Enables scalability, reliability, and cloud-native compatibility.  
+**Fix:** Switched to MinIO, an S3-compatible object store. Enables easier scalability, better reliability, and cloud-native compatibility.  

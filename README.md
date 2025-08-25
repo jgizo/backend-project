@@ -56,5 +56,5 @@ Example: A test file has been shared with both **admintest** and **usertest** by
 **Fix:** Integrated Redis pub/sub channels for real-time messaging. Messages now deliver instantly, while reducing DB load by decoupling persistence from delivery.  
 
 ### 2. Scalable File Storage  
-**Problem:** Files were stored locally, which broke scaling horizontally (each server would need its own copy). It also risked file I/O bottlenecks on the app server.  
+**Problem:** Files were stored locally, which adds difficulty to scaling horizontally (as each server would need its own copy). It also risked file I/O bottlenecks on the app server.  
 **Fix:** Switched to MinIO, an S3-compatible object store. Enables scalability, reliability, and cloud-native compatibility.  

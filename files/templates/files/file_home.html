@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Files</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            background-color: #f2f2f7;
+        }
+        #sidebar {
+            width: 280px;
+            background-color: #5d4b8b;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .nav-link {
+            padding: 12px;
+            margin: 5px 0;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            display: block;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+        .nav-link:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+        #main-content {
+            flex: 1;
+            padding: 40px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+        input[type="file"], select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 300px;
+        }
+        select[multiple] {
+            height: 100px;
+        }
+        button {
+            padding: 10px 20px;
+            width: 120px;
+            background-color: #8e7cc3;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #6f55a8;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #5d4b8b;
+            color: white;
+        }
+        a.button {
+            padding: 5px 10px;
+            background-color: #8e7cc3;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        a.button.delete {
+            background-color: #f44336;
+        }
+        a.button:hover {
+            opacity: 0.8;
+        }
+        .file-status {
+            font-size: 0.85rem;
+            margin-left: 5px;
+        }
+        .status-you { color: green; }
+        .status-shared { color: blue; }
+        .status-other { color: gray; }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h2>Files</h2>
+        <a href="{% url 'home' %}" class="nav-link">Home</a>
+        <a href="{% url 'chat_home' %}" class="nav-link">Chat</a>
+        <a href="{% url 'file_home' %}" class="nav-link">Files</a>
+        <div id="logout-form" style="margin-top:auto;">
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <h1>File Management</h1>
+
+        <!-- Upload form -->
+        <form method="post" enctype="multipart/form-data" action="{% url 'file-upload' %}">
+            {% csrf_token %}
+            <input type="file" name="file" required>
+
+            <label for="shared_with">Share with:</label>
+            <select name="shared_with" id="shared_with" multiple>
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Upload</button>
+        </form>
+
+        <!-- Files table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>File Name</th>
+                    <th>Owner</th>
+                    <th>Uploaded At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in files %}
+                <tr>
+                    <td>
+                        {{ file.file_name }}
+                        {% if file.owner == request.user %}
+                            <span class="file-status status-you">(You)</span>
+                        {% elif request.user in file.shared_with.all %}
+                            <span class="file-status status-shared">(Shared)</span>
+                        {% else %}
+                            <span class="file-status status-other">(Other)</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ file.owner.username }}</td>
+                    <td>{{ file.timestamp }}</td>
+                    <td>
+                        <a href="{% url 'file-download' file.pk %}" class="button">Download</a>
+                        {% if file.owner == request.user or request.user.is_superuser or request.user.role == 'admin' %}
+                        <a href="{% url 'file-delete' file.pk %}" class="button delete">Delete</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No files uploaded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

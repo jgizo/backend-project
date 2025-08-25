@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Home</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            background-color: #f2f2f7;
+        }
+
+        #sidebar {
+            width: 280px;
+            background-color: #5d4b8b;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+        .conversation, .user, .sidebar-button {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            display: block;
+        }
+        .conversation:hover, .user:hover, .sidebar-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        
+        #main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #e5e5ea; 
+            padding: 20px;
+        }
+        #welcome {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        
+        #logout-form {
+            margin-top: auto;
+            text-align: center;
+        }
+        #logout-form button {
+            padding: 8px 12px;
+            background-color: #8e7cc3; 
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #logout-form button:hover {
+            background-color: #6f55a8;
+        }
+    </style>
+</head>
+<body>
+
+    
+    <div id="sidebar">
+        <h2>Chat Home</h2>
+
+        <div class="section-title">Conversations</div>
+        {% for conv in conversations %}
+        <div class="conversation" data-url="{% url 'chat_room' conv.id %}">
+            {{ conv.name|default:"Private Chat" }}
+        </div>
+        {% empty %}
+        <p>No conversations yet.</p>
+        {% endfor %}
+
+        <div class="section-title">Users</div>
+        {% for user in users %}
+        <div class="user" data-url="{% url 'start_private_chat' user.id %}">
+            {{ user.username }}
+        </div>
+        {% empty %}
+        <p>No other users found.</p>
+        {% endfor %}
+
+        
+        <a href="{% url 'create_group_chat' %}" class="sidebar-button">+ Create Group</a>
+        <a href="{% url 'home' %}" class="sidebar-button">Home</a>
+
+        <div id="logout-form">
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+    </div>
+
+    
+    <div id="main-content">
+        <div id="welcome">
+            Welcome, {{ request.user.username }}!
+        </div>
+        <p>Select a conversation or a user from the sidebar to start chatting.</p>
+    </div>
+
+    <script>
+        
+        document.querySelectorAll('.conversation, .user').forEach(elem => {
+            elem.addEventListener('click', () => {
+                window.location.href = elem.dataset.url;
+            });
+        });
+    </script>
+</body>
+</html>

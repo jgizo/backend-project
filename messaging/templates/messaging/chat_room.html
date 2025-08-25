@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ conversation.name|default:"Private Chat" }}</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            background-color: #f0f0f5;
+        }
+
+        
+        #sidebar {
+            width: 220px;
+            background-color: #5d4b8b;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .nav-link {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+        .nav-link:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        #main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: #7e57c2;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+
+        #chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #e5e5ea;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            max-width: 60%;
+            word-wrap: break-word;
+        }
+        .message.sent {
+            background-color: #d1c4e9;
+            align-self: flex-end;
+        }
+        .message.received {
+            background-color: #f0f0f5;
+            align-self: flex-start;
+        }
+
+        form {
+            display: flex;
+            padding: 10px;
+            background-color: #e0e0eb;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 8px 12px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #7e57c2;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #6a3fb5;
+        }
+    </style>
+</head>
+<body>
+
+    
+    <div id="sidebar">
+        <h2>{{ conversation.name|default:"Chat" }}</h2>
+        <a href="{% url 'home' %}" class="nav-link">Home</a>
+        <a href="{% url 'chat_home' %}" class="nav-link">All Chats</a>
+    </div>
+
+    
+    <div id="main-content">
+        <header>
+            <h1>{{ conversation.name|default:"Private Chat" }}</h1>
+        </header>
+
+        <div id="chat-container">
+            {% for msg in messages %}
+                <div class="message {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
+                    <strong>{{ msg.sender.username }}</strong>: {{ msg.content }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <form id="chat-form">
+            {% csrf_token %}
+            <input type="text" id="chat-message-input" placeholder="Type your message..." autocomplete="off" required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const conversationId = "{{ conversation.id }}";
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/' + conversationId + '/'
+        );
+
+
+        const chatContainer = document.getElementById('chat-container');
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const newMessage = document.createElement('div');
+            newMessage.classList.add('message');
+            newMessage.classList.add(data.user === "{{ request.user.username }}" ? 'sent' : 'received');
+            newMessage.innerHTML = `<strong>${data.user}</strong>: ${data.message}`;
+            chatContainer.appendChild(newMessage);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        };
+
+        document.getElementById('chat-form').onsubmit = function(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-message-input');
+            chatSocket.send(JSON.stringify({
+                'message': input.value
+            }));
+            input.value = '';
+        };
+    </script>
+</body>
+</html>

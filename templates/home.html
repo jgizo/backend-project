@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            background-color: #f2f2f7;
+        }
+        #sidebar {
+            width: 280px;
+            background-color: #5d4b8b;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .nav-link {
+            padding: 12px;
+            margin: 5px 0;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            display: block;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+        .nav-link:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+        #logout-form {
+            margin-top: auto;
+            text-align: center;
+        }
+        #logout-form button {
+            padding: 8px 12px;
+            background-color: #8e7cc3;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+        #logout-form button:hover {
+            background-color: #6f55a8;
+        }
+        #main-content {
+            flex: 1;
+            padding: 40px;
+            background-color: #e5e5ea;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h2>Dashboard</h2>
+        <a href="{% url 'chat_home' %}" class="nav-link">Chat</a>
+        <a href="{% url 'file_home' %}" class="nav-link">Files</a>
+        <div id="logout-form">
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <h1>Welcome, {{ request.user.username }}!</h1>
+        <p>Select an option from the sidebar to get started.</p>
+    </div>
+
+</body>
+</html>
